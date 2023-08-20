@@ -14,7 +14,7 @@ using namespace std;
 ifstream in("secret.txt");
 int main();
 //функция использовалась для перевода списка слов в двоичный вид. более не нужна.
-//void resafe(string answer) {
+//void Resafe(string answer) {
 //    for (size_t k = 0; k < 101; k++) {
 //        getline(in, answer);
 //        while (getline(in, answer)) {
@@ -26,118 +26,132 @@ int main();
 //        }
 //    }
 //}
-class game {
-    string answer;
-    char symbol;
-    vector<char> visible;
-    set<char> used;
-    int errors;
-    bool flag;
-    bool victory;
-    clock_t start, end;
+class Game {
+    string Key_Word;
+    char Your_Letter;
+    vector<char> Visible_Letters;
+    set<char> Used_Letters;
+    int Errors_Count;
+    bool Test_for_Error;
+    bool Test_For_Victory;
+    clock_t Start_Time, End_Time;
 public:
-    game() {
-        start = clock();
-        symbol = ' ';
-        errors = 0;
-        flag = 0;
-        victory = 0;
+    Game() {
+        Start_Time = clock();
+        Your_Letter = ' ';
+        Errors_Count = 0;
+        Test_for_Error = 0;
+        Test_For_Victory = 0;
         for (size_t i = 0; i < rand() % 101; i++)
-            getline(in, answer);
-        answer = morph();
-        for (size_t i = 0; i < answer.size(); i++)
-            visible.insert(visible.end(), '_');
+            getline(in, Key_Word);
+        Key_Word = Decoding_Keyword();
+        for (size_t i = 0; i < Key_Word.size(); i++)
+            Visible_Letters.insert(Visible_Letters.end(), '_');
     }
-    string morph() {
+    string Decoding_Keyword() {
         string result_str;
-        for (int i = 0; i < answer.size(); i += 8) {
-            string byte = answer.substr(i, 8);
+        for (int i = 0; i < Key_Word.size(); i += 8) {
+            string byte = Key_Word.substr(i, 8);
             char c = static_cast<char>(bitset<8>(byte).to_ulong());
-            result_str.push_back(c);
+            result_str.push_back(toupper((unsigned char)c));
         }
         return result_str;
     }
-    void VisibleTable() {
+    void Visible_Table() {
         cout << "\t";
-        for (size_t i = 0; i < answer.size(); i++)
-            cout << visible[i] << " ";
+        for (size_t i = 0; i < Key_Word.size(); i++)
+            cout << Visible_Letters[i] << " ";
         cout << endl;
-        step(errors);
+        Draw_Hangman(Errors_Count);
+        cout << "\nиспользованные буквы: ";
+        for (auto i: Used_Letters)
+            cout << i << " ";
+        cout << endl;
     }
-    void TryAnswer() {
+
+
+
+    void Try_Answer() {
         while (1) {
-            victory = 0;
+            Test_For_Victory = 0;
             system("cls");
-            VisibleTable();
+            Visible_Table();
             cout << "\n\tвведите букву: " << endl;
-            cin >> symbol;
-            if (used.count(symbol)) {
+            cin >> Your_Letter;
+            Your_Letter = toupper((unsigned char)Your_Letter);
+            if (Used_Letters.count(Your_Letter)) {
                 cout << "эту букву уже искали.\n";
                 Sleep(2000);
                 continue;
             }
-            used.insert(symbol);
+            Used_Letters.insert(Your_Letter);
             break;
         }
-        flag = 0;
-        for (size_t i = 0; i < answer.size(); i++)
+        Test_for_Error = 0;
+        for (size_t i = 0; i < Key_Word.size(); i++)
         {
-            if (symbol == answer[i]) {
-                visible[i] = symbol;
+            if (Your_Letter == Key_Word[i]) {
+                Visible_Letters[i] = Your_Letter;
                 PlaySound(TEXT("answer.wav"), NULL, SND_FILENAME | SND_ASYNC);
-                flag = 1;
+                Test_for_Error = 1;
             }
         }
-        if (flag == 0) {
+        if (Test_for_Error == 0) {
             cout << "\nтакой буквы в слове нет." << endl;
             Sleep(2000);
             PlaySound(TEXT("error.wav"), NULL, SND_FILENAME | SND_ASYNC);
-            errors++;
-            if (errors == 6) {
+            Errors_Count++;
+            if (Errors_Count == 6) {
                 system("cls");
-                VisibleTable();
+                Visible_Table();
                 cout << "вы проиграли.\n";
-                cout << "количество используемых букв: "<<used.size()<<endl;
-                cout << "это слово было: " << answer << endl;
+                cout << "количество используемых букв: "<< Used_Letters.size()<<endl;
+                cout << "это слово было: " << Key_Word << endl;
                 PlaySound(TEXT("lose.wav"), NULL, SND_FILENAME | SND_ASYNC);
-                end = clock();
-                cout<<"Время на поиск нужного слова составило: "<< ((double)end - start)/1000<<" секунд"<<endl;
-                endgame();
+                End_Time = clock();
+                cout<<"Время на поиск нужного слова составило: "<< ((double)End_Time - Start_Time)/1000<<" секунд"<<endl;
+                End_Game();
             }
         }
-        for (int i = 0;i < visible.size();i++) {
-            if (visible[i] == '_')
-                victory = 1;
+        for (int i = 0;i < Visible_Letters.size();i++) {
+            if (Visible_Letters[i] == '_')
+                Test_For_Victory = 1;
         }
-        if (victory == 0) {
+        if (Test_For_Victory == 0) {
             system("cls");
-            VisibleTable();
+            Visible_Table();
             cout << "вы отгадали слово\n";
             PlaySound(TEXT("victory.wav"), NULL, SND_FILENAME | SND_ASYNC);
-            cout << "количество используемых букв: " << used.size() << endl;
-            end = clock();
-            cout << "Время на поиск нужного слова составило: " << ((double)end - start) / 1000 << " секунд" << endl;
-            endgame();
+            cout << "количество используемых букв: " << Used_Letters.size() << endl;
+            End_Time = clock();
+            cout << "Время на поиск нужного слова составило: " << ((double)End_Time - Start_Time) / 1000 << " секунд" << endl;
+            End_Game();
         }
     }
-    void endgame() {
+
+
+
+    void End_Game() {
         for (size_t i = 0; i < rand() % 101; i++)
-            getline(in, answer);
-        answer = morph();
-        visible.clear();
-        for (size_t i = 0; i < answer.size(); i++)
-            visible.insert(visible.end(), '_');
-        start = 0;
-        end = 0;
-        symbol = ' ';
-        used.clear();
-        errors = 0;
-        flag = 0;
-        victory = 0;
+            getline(in, Key_Word);
+        Key_Word = Decoding_Keyword();
+        Visible_Letters.clear();
+        for (size_t i = 0; i < Key_Word.size(); i++)
+            Visible_Letters.insert(Visible_Letters.end(), '_');
+        Start_Time = 0;
+        End_Time = 0;
+        Your_Letter = ' ';
+        Used_Letters.clear();
+        Errors_Count = 0;
+        Test_for_Error = 0;
+        Test_For_Victory = 0;
         system("pause");
         main();
     }
-    void step(int errors) {
+
+
+
+    void Draw_Hangman(int errors) {
         if (errors == 0) {
             cout << endl;
             cout << "        _______________\n";
@@ -252,6 +266,9 @@ public:
         }
     }
 };
+
+
+
 void menu() {
     system("cls");
     cout << "\t\t     Игра Виселица" << endl;
@@ -259,11 +276,11 @@ void menu() {
     cout << "\n\t\t      exit";
     cout << "\n\n\n\n\tPress arrows for move up/down / Press space to select an option";
     COORD c = { 20, 5 };
-    int menu11 = 0;
-    while (menu11 != 32)
+    int choise = 0;
+    while (choise != 32)
     {
-        menu11 = _getch();
-        switch (menu11)
+        choise = _getch();
+        switch (choise)
         {
         case 72:
             PlaySound(TEXT("menu.wav"), NULL, SND_FILENAME | SND_ASYNC);
@@ -299,26 +316,26 @@ void menu() {
         case 32:
             PlaySound(TEXT("menu.wav"), NULL, SND_FILENAME | SND_ASYNC);
             if (c.Y == 5)
-            {
                 break;
-            }
             if (c.Y == 6)
-            {
                 exit(1);
-            }
             break;
         }
     }
 }
+
+
+
 int main()
 {
+    setlocale(LC_ALL, "Russian");
     SetConsoleOutputCP(1251);
     SetConsoleCP(1251);
     srand(time(0));
     menu();
-    game game1;
+    Game Game1;
     while (1) {
-        game1.TryAnswer();
+        Game1.Try_Answer();
     }
 }
 
