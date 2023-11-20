@@ -20,4 +20,4 @@ Features:
 • the search word;
 • player letters.
 
-![ScreenShot](1.png)
+![ScreenShot](1.png) ![ScreenShot](2.png) ![ScreenShot](3.png)
