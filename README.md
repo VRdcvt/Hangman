@@ -19,3 +19,7 @@ Features:
 • number of attempts;
 • the search word;
 • player letters.
+
+![Screenshot] https://github.com/VRdcvt/Hangman/blob/main/1.png
+![Screenshot] https://github.com/VRdcvt/Hangman/blob/main/2.png
+![Screenshot] https://github.com/VRdcvt/Hangman/blob/main/3.png
